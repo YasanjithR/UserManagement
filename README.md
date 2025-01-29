@@ -55,6 +55,12 @@ JWT_SECRET=your_jwt_secret
 GMAIL_USER=your_gmail_address
 GMAIL_PASS=your_gmail_app_password
 ```
+Create a `.env` file in the `um-web` directory:
+
+```env
+REACT_APP_API_URL= {backend api hosted url}
+```
+
 
 ## 🚀 Running the Application
 
