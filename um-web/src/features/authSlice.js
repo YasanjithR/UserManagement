@@ -1,76 +1,49 @@
-import {createSlice,createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import JwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Correct named import
 
 const url = process.env.REACT_APP_BASE_URL;
 
-export const login = createAsyncThunk("auth/login" ,async (credentials,{rejectWithValue})=>{
-    try{
-        const response = await axios.post(`${url}/api/login`,credentials);
+export const login = createAsyncThunk("auth/login", async (credentials, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(`${url}/api/login`, credentials);
         return response.data;
-    }catch(error){
+    } catch (error) {
         return rejectWithValue(error.response.data);
     }
-})
-
+});
 
 const authSlice = createSlice({
-
-    name :"auth",
-    initialState : {
-        user : null,
-        token : null,
-        isAuthenticated : false,
-        userName : null,
-        email : null,
-        error : null,
-        loading : false
+    name: "auth",
+    initialState: {
+        user: null,
+        token: null,
+        loading: false,
+        error: null
     },
-
-    reducers :{
-        logout : (state)=>{
+    reducers: {
+        logout: (state) => {
             state.user = null;
             state.token = null;
-            state.isAuthenticated = false;
-            state.userName = null;
-            state.email = null;
-            localStorage.removeItem("token");
         }
     },
-    extraReducers:(builder) =>{
-
+    extraReducers: (builder) => {
         builder
-        
-        .addCase(login.pending,(state)=>{
-            state.loading = true;
-            state.error = null;
-        })
-        .addCase(login.fulfilled,(state,action)=>{
-          
-            state.token = action.payload.token;
-            state.isAuthenticated = true;
-          
-            state.loading = false;
-            localStorage.setItem("token", action.payload.token);
-            try{
-
-                const decoded = JwtDecode(action.payload.token);
-                state.user = decoded.id;
-                state.userName = decoded.firstname;
-                state.email = decoded.email;
-
-            }catch(error){
-                state.error = error.message;
-            }
-        })
-        .addCase(login.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload || "Failed to login";
-          });
-
+            .addCase(login.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(login.fulfilled, (state, action) => {
+                state.loading = false;
+                state.token = action.payload.token;
+                state.user = jwtDecode(action.payload.token); // Decode the token to get user info
+            })
+            .addCase(login.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
     }
-    
-})
+});
 
-export const{logout} = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

@@ -6,9 +6,9 @@ const { authenticate, generateToken} = require('../auth/authentication');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
-// Login API
+
 router.post('/login', 
-    body('username').isString().notEmpty(),
+    body('email').isString().notEmpty(),
     body('password').isString().notEmpty(),
     async (req, res) => {
         const errors = validationResult(req);
@@ -16,9 +16,9 @@ router.post('/login',
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { username, password } = req.body;
+        const { email, password } = req.body;
         try {
-            const user = await User.findOne({ username });
+            const user = await User.findOne({ email });
             if (user && bcrypt.compareSync(password, user.password)) {
                 const token = await generateToken(user.id, user.firstname, user.email);
                 res.json({ token });
@@ -26,12 +26,12 @@ router.post('/login',
                 res.status(401).send('Invalid credentials');
             }
         } catch (error) {
-            res.status(500).send('Server error');
+            res.status(500).send('Server error' + error);
         }
     }
 );
 
-// CRUD APIs
+
 router.post('/users', 
     authenticate,
     body('firstname').isString().notEmpty(),

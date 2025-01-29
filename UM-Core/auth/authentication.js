@@ -4,10 +4,14 @@ const SECRET_KEY = process.env.JWT_SECRET
 
 
 
-const generateToken = (payload) => {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' }); // 
-};
-
+const generateToken = (id, firstname, email) => {
+    const payload = {
+      id,
+      firstname,
+      email
+    };
+    return jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' });
+  };
 
 const authenticate = (req, res, next) => {
     const token = req.headers['authorization'];

@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { get } from "mongoose";
 const url = process.env.REACT_APP_BASE_URL;
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, { getState, rejectWithValue }) => {
@@ -8,7 +7,7 @@ export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, { getSt
     const token = getState().auth.token;
     try {
         const response = await axios.get(`${url}/api/users`, {
-            headers: { Authorization: token },
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status !== 200) {
             throw new Error("Failed to fetch users");
@@ -22,7 +21,7 @@ export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, { getSt
 })
 
 
-export const createUser = createAsyncThink("users/createUser", async (user, { getState, rejectWithValue }) => {
+export const createUser = createAsyncThunk("users/createUser", async (user, { getState, rejectWithValue }) => {
 
     const token = getState().auth.token;
     try {
@@ -63,7 +62,7 @@ export const deleteUser = createAsyncThunk("users/deleteUser", async (id, { getS
     const token = getState().auth.token;
     try {
         const response = await axios.delete(`${url}/api/users/${id}`, {
-            headers: { Authorization: token },
+            headers: { Authorization: `Bearer ${token}` }
         });
         if (response.status !== 200) {
             throw new Error("Failed to delete user");
@@ -142,7 +141,7 @@ const userSlice = createSlice({
             .addCase(deleteUser.rejected, (state, action) => {
                 state.error = action.payload || "Failed to delete user";
             })
-            .addCase(fetchUserById, fulfilled, (state, action) => {
+            .addCase(fetchUserById.fulfilled, (state, action) => {
                 state.selectedUser = action.payload;
             })
             .addCase(fetchUserById.rejected, (state, action) => {
