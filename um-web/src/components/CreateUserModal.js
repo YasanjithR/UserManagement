@@ -1,17 +1,27 @@
+
 import React, { useState } from "react"
 import { Modal, Button, Form } from "react-bootstrap"
 
-const CreateUserModal = ({ show, onHide, onCreateUser }) =>{
+const CreateUserModal = ({ show, onHide, onCreateUser }) => {
   const [email, setEmail] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-
+  const [firstname, setFirstName] = useState("")
+  const [lastname, setLastName] = useState("")
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const handleSubmit = (e) => {
-    e.preventDefault()
-    onCreateUser({ email, firstName, lastName })
-    setEmail("")
-    setFirstName("")
-    setLastName("")
+    try {
+      setLoading(true)
+      e.preventDefault()
+      onCreateUser({ email, firstname, lastname })
+      setEmail("")
+      setFirstName("")
+      setLastName("")
+    } catch (error) {
+      setError("An error occurred while creating the user")
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -37,7 +47,7 @@ const CreateUserModal = ({ show, onHide, onCreateUser }) =>{
             <Form.Control
               type="text"
               placeholder="Enter first name"
-              value={firstName}
+              value={firstname}
               onChange={(e) => setFirstName(e.target.value)}
               required
             />
@@ -48,7 +58,7 @@ const CreateUserModal = ({ show, onHide, onCreateUser }) =>{
             <Form.Control
               type="text"
               placeholder="Enter last name"
-              value={lastName}
+              value={lastname}
               onChange={(e) => setLastName(e.target.value)}
               required
             />
@@ -58,9 +68,11 @@ const CreateUserModal = ({ show, onHide, onCreateUser }) =>{
             <Button variant="secondary" onClick={onHide} className="me-2">
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              Create User
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? "Creating..." : "Create"}
             </Button>
+              {error && <div className="alert alert-danger m-3">{error}</div>}
+
           </div>
         </Form>
       </Modal.Body>

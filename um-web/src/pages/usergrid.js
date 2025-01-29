@@ -1,60 +1,61 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Container, Button } from "react-bootstrap"
 import UserDetailsCard from "../components/UserDetailsCard"
 import CreateUserModal from "../components/CreateUserModal"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
-
-const initialUsers = [
-  {
-    id: 1,
-    email: "john@example.com",
-    firstName: "John",
-    lastName: "Doe",
-    createdDate: "2023-01-15",
-    lastUpdatedDate: "2023-05-20",
-  },
-  {
-    id: 2,
-    email: "jane@example.com",
-    firstName: "Jane",
-    lastName: "Smith",
-    createdDate: "2023-02-20",
-    lastUpdatedDate: "2023-06-10",
-  },
-  {
-    id: 3,
-    email: "bob@example.com",
-    firstName: "Bob",
-    lastName: "Johnson",
-    createdDate: "2023-03-25",
-    lastUpdatedDate: "2023-07-05",
-  },
-]
+import { useDispatch, useSelector } from "react-redux"
+import { fetchUsers, updateUser, createUser, deleteUser } from "../features/userSlice"
+import { useNavigate } from 'react-router-dom'
 
 function UserGrid() {
-  const [users, setUsers] = useState(initialUsers)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { users, loading, error } = useSelector((state) => state.users)
+  const { isAuthenticated, token } = useSelector((state) => state.auth)
   const [editingId, setEditingId] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // Check authentication and fetch users on component mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // navigate('/login')
+      // return
+    }
+    dispatch(fetchUsers())
+    console.log(token)
+  }, [isAuthenticated, dispatch, navigate])
 
   const handleEdit = (id) => {
     setEditingId(id)
   }
 
-  const handleSave = (id, field, value) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id ? { ...user, [field]: value, lastUpdatedDate: new Date().toISOString().split("T")[0] } : user,
-      ),
-    )
-    setEditingId(null)
+  const handleSave = async (id, field, value) => {
+    const userToUpdate = users.find(user => user._id === id)
+    if (!userToUpdate) return
+
+    const updatedUser = {
+      ...userToUpdate,
+      [field]: value,
+    }
+
+    try {
+      await dispatch(updateUser(updatedUser)).unwrap()
+      setEditingId(null)
+    } catch (err) {
+      console.error('Failed to update user:', err)
+    }
   }
 
-  const handleDelete = (id) => {
-    setUsers(users.filter((user) => user.id !== id))
-    if (selectedUser && selectedUser.id === id) {
-      setSelectedUser(null)
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(deleteUser(id)).unwrap()
+      if (selectedUser && selectedUser._id === id) {
+        setSelectedUser(null)
+      }
+    } catch (err) {
+      console.error('Failed to delete user:', err)
     }
   }
 
@@ -62,16 +63,23 @@ function UserGrid() {
     setSelectedUser(user)
   }
 
-  const handleCreateUser = (newUser) => {
-    const currentDate = new Date().toISOString().split("T")[0]
-    const userWithDates = {
-      ...newUser,
-      id: users.length + 1,
-      createdDate: currentDate,
-      lastUpdatedDate: currentDate,
+  const handleCreateUser = async (newUser) => {
+    try {
+      await dispatch(createUser(newUser)).unwrap()
+
+      setShowCreateModal(false)
+    } catch (err) {
+      console.error('Failed to create user:', err)
     }
-    setUsers([...users, userWithDates])
-    setShowCreateModal(false)
+  }
+
+  if (loading) {
+    return <div className="text-center py-5">Loading...</div>
+  }
+
+  let errorMessage = null;
+  if (error) {
+    errorMessage = <div className="alert alert-danger mt-4">Error: {error}</div>;
   }
 
   return (
@@ -99,50 +107,50 @@ function UserGrid() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user._id}>
                     <td>
-                      {editingId === user.id ? (
+                      {editingId === user._id ? (
                         <input
                           type="email"
                           className="form-control form-control-sm"
                           defaultValue={user.email}
-                          onBlur={(e) => handleSave(user.id, "email", e.target.value)}
+                          onBlur={(e) => handleSave(user._id, "email", e.target.value)}
                         />
                       ) : (
                         user.email
                       )}
                     </td>
                     <td>
-                      {editingId === user.id ? (
+                      {editingId === user._id ? (
                         <input
                           type="text"
                           className="form-control form-control-sm"
-                          defaultValue={user.firstName}
-                          onBlur={(e) => handleSave(user.id, "firstName", e.target.value)}
+                          defaultValue={user.firstname}
+                          onBlur={(e) => handleSave(user._id, "firstname", e.target.value)}
                         />
                       ) : (
-                        user.firstName
+                        user.firstname
                       )}
                     </td>
                     <td>
-                      {editingId === user.id ? (
+                      {editingId === user._id ? (
                         <input
                           type="text"
                           className="form-control form-control-sm"
-                          defaultValue={user.lastName}
-                          onBlur={(e) => handleSave(user.id, "lastName", e.target.value)}
+                          defaultValue={user.lastname}
+                          onBlur={(e) => handleSave(user._id, "lastname", e.target.value)}
                         />
                       ) : (
-                        user.lastName
+                        user.lastname
                       )}
                     </td>
-                    <td>{user.createdDate}</td>
-                    <td>{user.lastUpdatedDate}</td>
+                    <td>{new Date(user.createdDate).toLocaleDateString()}</td>
+                    <td>{new Date(user.lastUpdateDate).toLocaleDateString()}</td>
                     <td>
-                      <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleEdit(user.id)}>
+                      <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleEdit(user._id)}>
                         Edit
                       </Button>
-                      <Button variant="outline-danger" size="sm" className="me-2" onClick={() => handleDelete(user.id)}>
+                      <Button variant="outline-danger" size="sm" className="me-2" onClick={() => handleDelete(user._id)}>
                         Delete
                       </Button>
                       <Button variant="outline-info" size="sm" onClick={() => handleView(user)}>
@@ -153,7 +161,9 @@ function UserGrid() {
                 ))}
               </tbody>
             </table>
+         
           </div>
+          {errorMessage}
           {selectedUser && <UserDetailsCard user={selectedUser} />}
         </Container>
       </main>
@@ -163,9 +173,10 @@ function UserGrid() {
         onHide={() => setShowCreateModal(false)}
         onCreateUser={handleCreateUser}
       />
+       
     </div>
+
   )
 }
 
 export default UserGrid
-

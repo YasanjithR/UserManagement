@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-const url = process.env.REACT_APP_BASE_URL;
+const url = process.env.REACT_APP_API_URL;
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, { getState, rejectWithValue }) => {
 
@@ -26,7 +26,7 @@ export const createUser = createAsyncThunk("users/createUser", async (user, { ge
     const token = getState().auth.token;
     try {
         const response = await axios.post(`${url}/api/users`, user, {
-            headers: { Authorization: token },
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status !== 200) {
             throw new Error("Failed to create user");
@@ -43,8 +43,8 @@ export const updateUser = createAsyncThunk("users/UpdateUser", async (user, { ge
 
     const token = getState().auth.token;
     try {
-        const response = await axios.put(`${url}/api/users/${user.id}`, user, {
-            headers: { Authorization: token },
+        const response = await axios.put(`${url}/api/users/${user._id}`, user, {
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status !== 200) {
             throw new Error("Failed to update user");
@@ -62,7 +62,7 @@ export const deleteUser = createAsyncThunk("users/deleteUser", async (id, { getS
     const token = getState().auth.token;
     try {
         const response = await axios.delete(`${url}/api/users/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status !== 200) {
             throw new Error("Failed to delete user");
@@ -80,8 +80,9 @@ export const fetchUserById = createAsyncThunk("users/fetchUserById", async (id, 
     const token = getState().auth.token;
     try {
         const response = await axios.get(`${url}/api/users/${id}`, {
-            headers: { Authorization: token },
+            headers: { Authorization: `Bearer ${token}` },
         });
+        console.log(token)
         if (response.status !== 200) {
             throw new Error("Failed to fetch user");
         }
@@ -117,14 +118,14 @@ const userSlice = createSlice({
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || "Failed to fetch users";
+                state.error = action.payload?.message || "Failed to fetch users";
             })
             .addCase(createUser.fulfilled, (state, action) => {
                 state.users.push(action.payload);
 
             })
             .addCase(createUser.rejected, (state, action) => {
-                state.error = action.payload || "Failed to create user";
+                state.error = action.payload?.message || "Failed to create user";
             })
             .addCase(updateUser.fulfilled, (state, action) => {
                 const index = state.users.findIndex(user => user._id === action.payload._id);
@@ -133,19 +134,19 @@ const userSlice = createSlice({
                 }
             })
             .addCase(updateUser.rejected, (state, action) => {
-                state.error = action.payload || "Failed to update user";
+                state.error = action.payload?.message || "Failed to update user";
             })
             .addCase(deleteUser.fulfilled, (state, action) => {
                 state.users = state.users.filter(user => user._id !== action.payload);
             })
             .addCase(deleteUser.rejected, (state, action) => {
-                state.error = action.payload || "Failed to delete user";
+                state.error = action.payload?.message || "Failed to delete user";
             })
             .addCase(fetchUserById.fulfilled, (state, action) => {
                 state.selectedUser = action.payload;
             })
             .addCase(fetchUserById.rejected, (state, action) => {
-                state.error = action.payload || "Failed to fetch a user";
+                state.error = action.payload?.message || "Failed to fetch a user";
             })
     }
 

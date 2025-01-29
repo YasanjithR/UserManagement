@@ -36,16 +36,17 @@ router.post('/users',
     authenticate,
     body('firstname').isString().notEmpty(),
     body('lastname').isString().notEmpty(),
-    body('email').isEmail(),
-    body('password').isLength({ min: 6 }),
+    body('email').isEmail().notEmpty(),
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+        
 
-        const { firstname, lastname, email, password } = req.body;
+        const { firstname, lastname, email } = req.body;
         try {
+            const password = Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = new User({ firstname, lastname, email, password: hashedPassword });
             await user.save();
