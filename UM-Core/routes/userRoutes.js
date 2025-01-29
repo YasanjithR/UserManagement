@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('./models/User'); // MongoDB model
-const { authenticate, generateToken} = require('./auth/authentication');
+const User = require('../models/User');
+const { authenticate, generateToken} = require('../auth/authentication');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
