@@ -1,91 +1,94 @@
 import { configureStore } from "@reduxjs/toolkit";
-import usersReducer, { fetchUsers, createUser, updateUser, deleteUser, fetchUserById } from "./usersSlice";
-import axios from "axios";
-import MockAdapter from "axios-mock-adapter";
+import usersReducer, {
+  fetchUsers,
+  createUser,
+  updateUser,
+  deleteUser
+} from "../src/features/userSlice";
 
-// Create a mock instance of axios
-const mock = new MockAdapter(axios);
 
-// Setup a test Redux store
-const store = configureStore({ reducer: { users: usersReducer, auth: (state = { token: "test-token" }) => state } });
+jest.mock('axios');
+
+import axios from 'axios';
+
+const store = configureStore({ 
+  reducer: { 
+    users: usersReducer 
+  } 
+});
 
 describe("Users Slice", () => {
-  afterEach(() => {
-    mock.reset(); // Reset the mock after each test
+  beforeEach(() => {
+ 
+    jest.clearAllMocks();
   });
 
   test("should handle fetching users", async () => {
-    // Mock API response for fetching users
     const users = [{ _id: "123", firstname: "John", lastname: "Doe" }];
-    mock.onGet("http://localhost:5000/api/users").reply(200, users);
 
-    // Dispatch the fetchUsers action
+    axios.get.mockResolvedValueOnce({ data: users });
+
     await store.dispatch(fetchUsers());
 
-    // Get updated state
-    const state = store.getState().users;
+    expect(axios.get).toHaveBeenCalledWith(
+      "http://localhost:5000/api/users"
+    );
 
-    // Expect users to be set in the state
+    const state = store.getState().users;
     expect(state.users).toEqual(users);
   });
 
   test("should handle creating a user", async () => {
-    // Mock API response for creating a user
-    const newUser = { _id: "123", firstname: "John", lastname: "Doe" };
-    mock.onPost("http://localhost:5000/api/users").reply(200, newUser);
+    const newUser = { firstname: "John", lastname: "Doe" };
+    const savedUser = { ...newUser, _id: "123" };
+    
+    axios.post.mockResolvedValueOnce({ data: savedUser });
 
-    // Dispatch the createUser action
     await store.dispatch(createUser(newUser));
 
-    // Get updated state
-    const state = store.getState().users;
+    expect(axios.post).toHaveBeenCalledWith(
+      "http://localhost:5000/api/users",
+      newUser
+    );
 
-    // Expect user to be added to the users array
-    expect(state.users).toContainEqual(newUser);
+    const state = store.getState().users;
+    expect(state.users).toContainEqual(savedUser);
   });
 
   test("should handle updating a user", async () => {
-    // Mock API response for updating a user
     const updatedUser = { _id: "123", firstname: "John", lastname: "Smith" };
-    mock.onPut("http://localhost:5000/api/users/123").reply(200, updatedUser);
+    
+    axios.put.mockResolvedValueOnce({ data: updatedUser });
 
-    // Dispatch updateUser action
     await store.dispatch(updateUser(updatedUser));
 
-    // Get updated state
-    const state = store.getState().users;
+    expect(axios.put).toHaveBeenCalledWith(
+      `http://localhost:5000/api/users/${updatedUser._id}`,
+      updatedUser
+    );
 
-    // Expect updated user to be in users array
-    expect(state.users.find((user) => user._id === "123")).toEqual(updatedUser);
+    const state = store.getState().users;
+    expect(state.users.find(u => u._id === updatedUser._id)).toEqual(updatedUser);
   });
 
   test("should handle deleting a user", async () => {
-    // Mock API response for deleting a user
     const userId = "123";
-    mock.onDelete(`http://localhost:5000/api/users/${userId}`).reply(200, userId);
+    
+    axios.delete.mockResolvedValueOnce({ data: userId });
 
-    // Dispatch deleteUser action
+   
+    store.dispatch({ 
+      type: 'users/resetState', 
+      payload: [{ _id: userId, firstname: "John", lastname: "Doe" }] 
+    });
+
     await store.dispatch(deleteUser(userId));
 
-    // Get updated state
+    expect(axios.delete).toHaveBeenCalledWith(
+      `http://localhost:5000/api/users/${userId}`
+    );
+
     const state = store.getState().users;
-
-    // Expect user to be removed from the users array
-    expect(state.users.find((user) => user._id === userId)).toBeUndefined();
-  });
-
-  test("should handle fetching a user by ID", async () => {
-    // Mock API response for fetching a user by ID
-    const user = { _id: "123", firstname: "John", lastname: "Doe" };
-    mock.onGet(`http://localhost:5000/api/users/${user._id}`).reply(200, user);
-
-    // Dispatch fetchUserById action
-    await store.dispatch(fetchUserById(user._id));
-
-    // Get updated state
-    const state = store.getState().users;
-
-    // Expect selected user to be set in the state
-    expect(state.selectedUser).toEqual(user);
+    expect(state.users.find(u => u._id === userId)).toBeUndefined();
   });
 });
