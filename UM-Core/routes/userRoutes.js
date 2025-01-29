@@ -5,8 +5,8 @@ const User = require('../models/User');
 const { authenticate, generateToken} = require('../auth/authentication');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
-
-
+const nodeMailer = require('nodemailer');
+require('dotenv').config(); 
 router.post('/login', 
     body('email').isString().notEmpty(),
     body('password').isString().notEmpty(),
@@ -50,6 +50,24 @@ router.post('/users',
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = new User({ firstname, lastname, email, password: hashedPassword });
             await user.save();
+
+            const mailOptions = {
+                from: process.env.GMAIL_USER,
+                to: email,
+                subject: 'Welcome to UserManagement',
+                text: `Hello ${firstname},\n\nYour account has been successfully created.\n\nHere is your password: ${password}\n\nPlease change it once you log in.\n\nBest regards,\nYour Team`,
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+
+                if (error) {
+                    console.log(error);
+                    return res.status(500).send('Error sending email');
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+
             res.json(user);
         } catch (error) {
             res.status(500).send('Server error');
@@ -104,5 +122,17 @@ router.get('/users/:id', authenticate, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+
+const  transporter = nodeMailer.createTransport({
+
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
+    }
+
+}
+)
 
 module.exports = router;

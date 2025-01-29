@@ -101,7 +101,8 @@ const userSlice = createSlice({
         users: [],
         selectedUser: null,
         loading: false,
-        error: null
+        error: null,
+        successMessage : null
     },
 
     reducers: {},
@@ -122,6 +123,7 @@ const userSlice = createSlice({
             })
             .addCase(createUser.fulfilled, (state, action) => {
                 state.users.push(action.payload);
+                state.successMessage = "User created successfully.Password has been emailed to user.";
 
             })
             .addCase(createUser.rejected, (state, action) => {
@@ -132,12 +134,14 @@ const userSlice = createSlice({
                 if (index !== -1) {
                     state.users[index] = action.payload;
                 }
+                state.successMessage = "User updated successfully";
             })
             .addCase(updateUser.rejected, (state, action) => {
                 state.error = action.payload?.message || "Failed to update user";
             })
             .addCase(deleteUser.fulfilled, (state, action) => {
                 state.users = state.users.filter(user => user._id !== action.payload);
+                state.successMessage = "User deleted successfully";
             })
             .addCase(deleteUser.rejected, (state, action) => {
                 state.error = action.payload?.message || "Failed to delete user";

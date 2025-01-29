@@ -132,4 +132,34 @@
   .modal-footer {
     border-top: none;
   }
+
+  .customer-alert-success {
+    background-color: white; /* A professional green shade */
+    color: #10B981;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    border-left: 4px solid #059669;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+  }
   
+  .customer-alert-error {
+    background-color: white; /* A warm red shade */
+    color: #EF4444;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    border-left: 4px solid #DC2626;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+
+   

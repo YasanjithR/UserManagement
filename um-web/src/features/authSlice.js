@@ -26,6 +26,7 @@ const authSlice = createSlice({
         email : localStorage.getItem("email") || null,
         error : null,
         loading : false
+     
 
       
     },

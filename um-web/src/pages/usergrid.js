@@ -7,11 +7,12 @@ import Footer from "../components/Footer"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchUsers, updateUser, createUser, deleteUser } from "../features/userSlice"
 import { useNavigate } from 'react-router-dom'
+import { Alert } from "../components/Alert"
 
 function UserGrid() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { users, loading, error } = useSelector((state) => state.users)
+  const { users, loading, error,successMessage } = useSelector((state) => state.users)
   const { isAuthenticated, token } = useSelector((state) => state.auth)
   const [editingId, setEditingId] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -66,7 +67,6 @@ function UserGrid() {
   const handleCreateUser = async (newUser) => {
     try {
       await dispatch(createUser(newUser)).unwrap()
-
       setShowCreateModal(false)
     } catch (err) {
       console.error('Failed to create user:', err)
@@ -79,7 +79,12 @@ function UserGrid() {
 
   let errorMessage = null;
   if (error) {
-    errorMessage = <div className="alert alert-danger mt-4">Error: {error}</div>;
+    errorMessage = <div className="customer-alert-error mt-4">Error: {error}</div>;
+  }
+
+  let success = null;
+  if (successMessage) {
+    success = <div className="customer-alert-success mt-4">Success: {successMessage}</div>;
   }
 
   return (
@@ -163,8 +168,10 @@ function UserGrid() {
             </table>
          
           </div>
-          {errorMessage}
+          
           {selectedUser && <UserDetailsCard user={selectedUser} />}
+          {errorMessage}
+          {success}
         </Container>
       </main>
       <Footer />
