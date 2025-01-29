@@ -8,8 +8,6 @@ import { useEffect } from "react";
 
 const LoginPage = () => {
     const { loading, error, isAuthenticated } = useSelector((state) => state.auth)
-
-
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const dispatch = useDispatch()
@@ -18,17 +16,14 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const handleSubmit = (e) => {
         e.preventDefault()
-     
         const response = dispatch(login({ email, password }))
         console.log("Login attempted with:", { email })
-    
-
         response.then((result) => {
             if (result.meta.requestStatus === "fulfilled") {
-            navigate("/users");
+                navigate("/users");
             }
         });
-   
+
     }
 
     useEffect(() => {
@@ -38,8 +33,6 @@ const LoginPage = () => {
     }, [isAuthenticated, navigate])
 
     return (
-
-        
         <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
             <div className="row justify-content-center w-100">
                 <div className="col-12 col-md-6 col-lg-4">
@@ -76,7 +69,7 @@ const LoginPage = () => {
                                 />
                             </div>
 
-                        
+
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <div className="form-check">
                                     <input className="form-check-input" type="checkbox" id="rememberMe" />
@@ -84,24 +77,17 @@ const LoginPage = () => {
                                         Remember me
                                     </label>
                                 </div>
-                                <a href="#" className="text-primary text-decoration-none">
-                                    Forgot password?
-                                </a>
+
                             </div>
                             <button type="submit" className="btn btn-primary w-100" disabled={auth.loading}>
-                            {auth.loading ? "Logging in..." : "Login"}
+                                {auth.loading ? "Logging in..." : "Login"}
                             </button>
                             {auth.error && <div className="alert alert-danger m-3">{auth.error}</div>}
 
-                            
+
                         </form>
                     </CardWithLogo>
-                    <p className="text-center mt-3">
-                        Don't have an account?{" "}
-                        <a href="#" className="text-primary text-decoration-none">
-                            Sign up
-                        </a>
-                    </p>
+
                 </div>
             </div>
         </div>

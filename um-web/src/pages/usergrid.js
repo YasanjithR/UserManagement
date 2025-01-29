@@ -12,7 +12,7 @@ import { Alert } from "../components/Alert"
 function UserGrid() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { users, loading, error,successMessage } = useSelector((state) => state.users)
+  const { users, loading, error, successMessage } = useSelector((state) => state.users)
   const { isAuthenticated, token } = useSelector((state) => state.auth)
   const [editingId, setEditingId] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -93,7 +93,7 @@ function UserGrid() {
       <main className="flex-grow-1">
         <Container className="py-5">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="h4 mb-0">User List</h2>
+            <h2 className="h4 mb-0 text-primary">User Master</h2>
             <Button variant="primary" onClick={() => setShowCreateModal(true)}>
               Create User
             </Button>
@@ -166,9 +166,9 @@ function UserGrid() {
                 ))}
               </tbody>
             </table>
-         
+
           </div>
-          
+
           {selectedUser && <UserDetailsCard user={selectedUser} />}
           {errorMessage}
           {success}
@@ -180,7 +180,7 @@ function UserGrid() {
         onHide={() => setShowCreateModal(false)}
         onCreateUser={handleCreateUser}
       />
-       
+
     </div>
 
   )
