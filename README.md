@@ -64,10 +64,12 @@ REACT_APP_API_URL= {backend api hosted url}
 
 ## 🚀 Running the Application
 
+
 ### Start Backend Server
 
 ```bash
 cd UM-Core
+npm i
 npm start
 ```
 
@@ -75,6 +77,7 @@ npm start
 
 ```bash
 cd um-web
+npm i
 npm start
 ```
 
@@ -89,12 +92,6 @@ cd um-web
 npm test
 ```
 
-### Running Backend Tests
-
-```bash
-cd UM-Core
-npm test
-```
 
 ## 📁 Project Structure
 
