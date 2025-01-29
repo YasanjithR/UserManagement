@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
         
     },
 
-    username :{
+    email :{
         type: String,
         required: true,
         unique: true
@@ -26,6 +26,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
 
+    },
+
+    createdDate: {
+        type: Date,
+        default: Date.now
+    },
+
+    lastUpdateDate:{
+        type: Date,
+        default: Date.now
     }
 
 
